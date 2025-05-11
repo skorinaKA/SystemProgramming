@@ -555,14 +555,14 @@ void compress_ISXTXT()                            /* Программа уплотнения   */
 		for (I2 = 0; I2 < 80; I2++)
 			if (ISXTXT[I1][I2] != '\x0')
 			{
-				if (ISXTXT[I1][I2] == ' ' &&
+				if ((ISXTXT[I1][I2] == ' ' || ISXTXT[I1][I2] == '\n' || ISXTXT[I1][I2] == '\r') &&
 					(PREDSYM == ' ' || PREDSYM == ';' ||
 						PREDSYM == ')' || PREDSYM == ':' ||
 						PREDSYM == '('
 						)
 					)
 				{
-					PREDSYM = ISXTXT[I1][I2];
+					PREDSYM = ' ';
 					goto L2;
 				}
 
@@ -584,7 +584,7 @@ void compress_ISXTXT()                            /* Программа уплотнения   */
 				}
 
 
-				if (ISXTXT[I1][I2] == ' ' &&
+				if ((ISXTXT[I1][I2] == ' ' || ISXTXT[I1][I2] == '\n' || ISXTXT[I1][I2] == '\r') &&
 					(PREDSYM == '+' || PREDSYM == '-' ||
 						PREDSYM == '=' || PREDSYM == '*'
 						)
