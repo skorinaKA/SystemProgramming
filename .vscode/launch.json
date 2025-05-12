@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/komppl.exe",
-            "args": ["examppl.pli"],
+            "args": ["__examppl.pli"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
