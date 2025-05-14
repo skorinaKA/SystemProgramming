@@ -637,7 +637,8 @@ void compress_ISXTXT()                            /* Программа уплотнения   */
 							ISXTXT[I1][I2] == '=' ||
 							ISXTXT[I1][I2] == '(' ||
 							ISXTXT[I1][I2] == ')' ||
-							ISXTXT[I1][I2] == '*'
+							ISXTXT[I1][I2] == '*' ||
+							ISXTXT[I1][I2] == ','
 							)
 						&&
 						PREDSYM == ' '
@@ -970,6 +971,10 @@ void ZKARD()                                     /* записи очередной сгене-*/
 						 /* ходного файла в массив */
 						 /* ASSTXT                 */
 	char i;
+
+	for (i = 0; i < 50; i++)
+		ASSTXT[i][79] = '\n';
+
 	memcpy(ASSTXT[IASSTXT++],
 		ASS_CARD.BUFCARD, 80);
 
@@ -1346,7 +1351,7 @@ int AVI2()
 					/* ровской операции L     */
 
 					strcpy(ASS_CARD._BUFCARD.OPERAND,   /*       формируем        */
-						"RRAB,");/*       первый  и        */
+						"@RSUM,");/*       первый  и        */
 					strcat(ASS_CARD._BUFCARD.OPERAND,   /* второй операнды ассемб-*/
 						FORMT[0]);/* леровской операции     */
 
@@ -1423,7 +1428,7 @@ int AVI2()
 					}
 					/* формируем:             */
 					strcpy(ASS_CARD._BUFCARD.OPERAND,   /* - первый операнд ассем-*/
-						"RRAB,");/*блеровской операции;    */
+						"@RSUM,");/*блеровской операции;    */
 					strcat(ASS_CARD._BUFCARD.OPERAND,   /* - второй операнд ассем-*/
 						FORMT[IFORMT - 1]);/*блеровской операции;    */
 					ASS_CARD._BUFCARD.OPERAND[strlen
@@ -1646,14 +1651,32 @@ int OEN2()
 	/* рабочий регистры общего*/
 	/* назначения             */
 
-	memcpy(ASS_CARD._BUFCARD.METKA, "RBASE", 5); /* формирование EQU-псев- */
+	memcpy(ASS_CARD._BUFCARD.METKA, "@RBASE", 6); /* формирование EQU-псев- */
 	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3);   /* дооперации определения */
 	memcpy(ASS_CARD._BUFCARD.OPERAND, "15", 2);  /* номера базового регист-*/
 	/* ра общего назначения   */
 	/*           и            */
 	ZKARD();                                       /* запоминание ее         */
 
-	memcpy(ASS_CARD._BUFCARD.METKA, "RRAB", 4);  /* формирование EQU-псев- */
+	memcpy(ASS_CARD._BUFCARD.METKA, "@R1", 3);  
+	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3); 
+	memcpy(ASS_CARD._BUFCARD.OPERAND, "1", 1);  												
+												
+	ZKARD();
+
+	memcpy(ASS_CARD._BUFCARD.METKA, "@RCNT", 5);  
+	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3); 
+	memcpy(ASS_CARD._BUFCARD.OPERAND, "2", 1);  
+															
+	ZKARD();                                    
+
+	memcpy(ASS_CARD._BUFCARD.METKA, "@R3", 3);  
+	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3); 
+	memcpy(ASS_CARD._BUFCARD.OPERAND, "3", 1);  
+																				
+	ZKARD(); 	
+
+	memcpy(ASS_CARD._BUFCARD.METKA, "@RSUM", 5);  /* формирование EQU-псев- */
 	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3);   /* дооперации определения */
 	memcpy(ASS_CARD._BUFCARD.OPERAND, "5", 1);   /* номера базового регист-*/
 	/* ра общего назначения   */
@@ -1665,8 +1688,8 @@ int OEN2()
 	/* операции END,          */
 	i = 0;
 
-	while (FORMT[1][i] != '\x0')                 /* ее операнда            */
-		ASS_CARD._BUFCARD.OPERAND[i] = FORMT[1][i++];/*         и              */
+	// while (FORMT[1][i] != '\x0')                 /* ее операнда            */
+	// 	ASS_CARD._BUFCARD.OPERAND[i] = FORMT[1][i++];/*         и              */
 
 	memcpy(ASS_CARD._BUFCARD.COMM,                /* построчного коментария */
 		"Конец программы", 15);
@@ -1734,7 +1757,7 @@ int OPA2()
 						"ST", 2);
 
 				strcpy(ASS_CARD._BUFCARD.OPERAND,   /*       доформировать    */
-					"RRAB,");/*          операнды      */
+					"@RSUM,");/*          операнды      */
 
 				strcat(ASS_CARD._BUFCARD.OPERAND,   /*           команды      */
 					FORMT[0]);
@@ -1797,14 +1820,14 @@ int OPR2()
 
 	memcpy(ASS_CARD._BUFCARD.OPERAC, "BALR", 4); /* формируем BALR-операцию*/
 	memcpy(ASS_CARD._BUFCARD.OPERAND,             /* Ассемблера             */
-		"RBASE,0", 7);
+		"@RBASE,0", 8);
 	memcpy(ASS_CARD._BUFCARD.COMM,
 		"Загрузить регистр базы", 22);
 	ZKARD();                                       /* и запоминаем ее        */
 
 	memcpy(ASS_CARD._BUFCARD.OPERAC, "USING", 5);/* формируем USING-псевдо-*/
 	memcpy(ASS_CARD._BUFCARD.OPERAND,             /* операцию Ассемблера    */
-		"*,RBASE", 7);
+		"*,@RBASE", 8);
 	memcpy(ASS_CARD._BUFCARD.COMM,
 		"Назначить регистр базой", 23);
 	ZKARD();                                       /* и запоминаем ее        */
@@ -1947,7 +1970,7 @@ int DLP2()
         sprintf(LOOP_END_LABEL2, "%s%d%d", LOOP_LABEL_BASE, 2, 2);
 
         memcpy(ASS_CARD._BUFCARD.OPERAC, "LA", 2);
-        memcpy(ASS_CARD._BUFCARD.OPERAND, "R1,1", 4);
+        memcpy(ASS_CARD._BUFCARD.OPERAND, "@R1,1", 5);
         ZKARD();
         int j;
         for (j = 0; j < 2; j++)
@@ -1963,26 +1986,26 @@ int DLP2()
             memcpy(ASS_CARD._BUFCARD.METKA, LOOP_END_LABEL1, strlen(LOOP_END_LABEL1));
           }
           memcpy(ASS_CARD._BUFCARD.OPERAC, "LA", 2);
-          strcpy(ASS_CARD._BUFCARD.OPERAND, "R2,");
+          strcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,");
           strcat(ASS_CARD._BUFCARD.OPERAND, FORMT[j * 3 + 2]);
           ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
           ZKARD();
 
           memcpy(ASS_CARD._BUFCARD.OPERAC, "LA", 2);
-          strcpy(ASS_CARD._BUFCARD.OPERAND, "R3,");
+          strcpy(ASS_CARD._BUFCARD.OPERAND, "@R3,");
           strcat(ASS_CARD._BUFCARD.OPERAND, FORMT[j * 3 + 4]);
           ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
           ZKARD();
 
           memcpy(ASS_CARD._BUFCARD.OPERAC, "STH", 3);
-          strcpy(ASS_CARD._BUFCARD.OPERAND, "R2,");
+          strcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,");
           strcat(ASS_CARD._BUFCARD.OPERAND, FORMT[1]);
           ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
           ZKARD();
 
           memcpy(ASS_CARD._BUFCARD.METKA, LOOP_LABEL, strlen(LOOP_LABEL));
-          memcpy(ASS_CARD._BUFCARD.OPERAC, "CR", 2);
-          memcpy(ASS_CARD._BUFCARD.OPERAND, "R2,R3", 5);
+          memcpy(ASS_CARD._BUFCARD.OPERAC, "CH", 2);
+          memcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,@R3", 9);
           ZKARD();
 
           memcpy(ASS_CARD._BUFCARD.OPERAC, "BC", 2);
@@ -1996,17 +2019,17 @@ int DLP2()
           // >>>>>>>>> INCREMENT
 
           memcpy(ASS_CARD._BUFCARD.OPERAC, "LH", 2);
-          strcpy(ASS_CARD._BUFCARD.OPERAND, "R2,");
+          strcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,");
           strcat(ASS_CARD._BUFCARD.OPERAND, FORMT[2]);
           ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
           ZKARD();
 
-          memcpy(ASS_CARD._BUFCARD.OPERAC, "AR", 2);
-          memcpy(ASS_CARD._BUFCARD.OPERAND, "R2,R1", 5);
+          memcpy(ASS_CARD._BUFCARD.OPERAC, "AH", 2);
+          memcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,@R1", 9);
           ZKARD();
 
           memcpy(ASS_CARD._BUFCARD.OPERAC, "STH", 3);
-          strcpy(ASS_CARD._BUFCARD.OPERAND, "R2,");
+          strcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,");
           strcat(ASS_CARD._BUFCARD.OPERAND, FORMT[2]);
           ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
           ZKARD();
@@ -2023,9 +2046,9 @@ int DLP2()
 
           if (loopNumber == 2) {
             memcpy(ASS_CARD._BUFCARD.METKA, LOOP_END_LABEL2, strlen(LOOP_END_LABEL2));
-            memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3);
-            memcpy(ASS_CARD._BUFCARD.OPERAND, "*", 1);
-            ZKARD();
+            // memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3);
+            // memcpy(ASS_CARD._BUFCARD.OPERAND, "*", 1);
+            // ZKARD();
           }
 
           // END OF LOOP
@@ -2133,7 +2156,7 @@ int main(int argc, char** argv)
 
 	{                                              /* по ошибке в командн.стр*/
 		printf("%s\n", "Ошибка в командной строке"); /* выдать диагностику и   */
-		return;                                       /* завершить трансляцию   */
+		return 0;                                       /* завершить трансляцию   */
 	}
 
 	/* проверка типа исх.файла*/
@@ -2145,7 +2168,7 @@ int main(int argc, char** argv)
 	{
 		printf("%s\n",                              /* выдать диагностику и   */
 			"Неверный тип файла с исходным текстом");
-		return;                                       /* завершить трансляцию   */
+		return 0;                                       /* завершить трансляцию   */
 	}
 
 
@@ -2157,7 +2180,7 @@ int main(int argc, char** argv)
 		{
 			printf("%s\n",
 				"Не найден файл с исходным текстом");
-			return;                                     /* завершение трансляции  */
+			return 0;                                     /* завершение трансляции  */
 		}
 
 		else                                          /* иначе:                 */
@@ -2176,14 +2199,14 @@ int main(int argc, char** argv)
 					{                                      /* выдаем диагностику     */
 						printf("%s\n",
 							"Ошибка при чтении фыйла с исх.текстом");
-						return;                               /* и завершаем трансляцию */
+						return 0;                               /* и завершаем трансляцию */
 					}
 				}
 			}
 
 			printf("%s\n",                            /*при пеерполнении массива*/
 				"Переполнение буфера чтения исх.текста"); /* ISXTXT выдать диагн.   */
-			return;                                     /* и завершить трансляцию */
+			return 0;                                     /* и завершить трансляцию */
 		}
 
 	}
@@ -2216,7 +2239,7 @@ main1:                                            /* по завершении чтения   */
 		(
 			"%s\n", "трансляция прервана"
 		);
-		return;                                      /* завершаем трансляцию   */
+		return 0;                                      /* завершаем трансляцию   */
 	}
 	else                                            /* иначе делаем           */
 	{
@@ -2227,7 +2250,7 @@ main1:                                            /* по завершении чтения   */
 
 			printf("%s\n",                           /* - диагностич.сообщение;*/
 				"трансляция завершена успешно");
-			return;                                    /* - завершить трансляцию */
+			return 0;                                    /* - завершить трансляцию */
 
 
 		case  1:                                    /*если код завершения = 1,*/
