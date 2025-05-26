@@ -1,4 +1,4 @@
-#define DL_ASSTEXT 16
+#define DL_ASSTEXT 50
 #define DL_OBJTEXT 50                             /*длина об'ектн. текста   */
 #define NSYM 10                                   /*размер табл.символов    */
 #define NPOP 6                                    /*размер табл.псевдоопер. */
@@ -939,7 +939,7 @@ int main( int argc, char **argv )                /*главная программа       */
 
    {
     printf ( "%s\n", "Ошибка в командной строке" );
-    return;
+    return 0;
    }
 
 
@@ -947,7 +947,7 @@ int main( int argc, char **argv )                /*главная программа       */
 
    {
     printf ( "%s\n", "Неверный тип файла с исходным текстом" );
-    return;
+    return 0;
    }
 
 
@@ -958,7 +958,7 @@ int main( int argc, char **argv )                /*главная программа       */
 						  /* сообщение об ошибке    */
      {
       printf ( "%s\n", "Не найден файл с исходным текстом" );
-      return;
+      return 0;
      }
 
     else
@@ -974,13 +974,13 @@ int main( int argc, char **argv )                /*главная программа       */
 	  else
 	   {
 	    printf ( "%s\n", "Ошибка при чтении фыйла с исх.текстом" );
-	    return;
+	    return 0;
 	   }
 	 }
        }
 
       printf ( "%s\n", "Переполнение буфера чтения исх.текста" );
-      return;
+      return 0;
      }
 
    }
@@ -1157,7 +1157,7 @@ CONT5:
        "ошибка при формировании об'ектного файла"
       );
    }
-    return;                                       /*завершить main-прогр.   */
+    return 0;                                       /*завершить main-прогр.   */
 
 ERR1:
   printf ("%s\n","ошибка формата данных");        /*выдать диагностич.сообщ.*/

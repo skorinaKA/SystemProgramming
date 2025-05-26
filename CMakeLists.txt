@@ -13,10 +13,16 @@ project ("SystemProgramming")
 
 # Добавьте источник в исполняемый файл этого проекта.
 # add_executable (SystemProgramming "SystemProgramming.cpp" "SystemProgramming.h")
+set(CMAKE_BUILD_TYPE "Debug")
 add_executable (komppl "komppl.c")
 set_target_properties(komppl PROPERTIES
 	VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 	VS_DEBUGGER_COMMAND_ARGUMENTS "examppl.pli")
+
+add_executable (kompassr "kompassr.c")
+set_target_properties(kompassr PROPERTIES
+	VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+	VS_DEBUGGER_COMMAND_ARGUMENTS "examppl.ass")
 
 if(NOT CMAKE_C_COMPILER)
     message(FATAL_ERROR "CMAKE_C_COMPILER is not set.")
@@ -25,6 +31,7 @@ endif()
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   # set_property(TARGET SystemProgramming PROPERTY CXX_STANDARD 20)
   set_property(TARGET komppl PROPERTY C_STANDARD 11)
+  set_property(TARGET kompassr PROPERTY C_STANDARD 11)
 endif()
 
 # TODO: Добавьте тесты и целевые объекты, если это необходимо.
