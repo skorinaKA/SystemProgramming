@@ -1,40 +1,39 @@
  EX21    START 0            Начало программы                                   
          BALR  @RBASE,0     Загрузить регистр базы                             
          USING *,@RBASE     Назначить регистр базой                            
-         LH    @RSUM,S      Загрузка переменной в регистр                      
-         AH    @RSUM,N      Формирование промежуточного значения               
-         STH   @RSUM,S      Формирование значения арифм.выражения              
-         LA    @R1,1                                                           
-         LA    @RCNT,1                                                         
-         LA    @R3,5                                                           
+         LH    @RCNT,@1                                                        
          STH   @RCNT,N                                                         
-@L1      CH    @RCNT,@R3                                                       
-         BC    2,@L11                                                          
+@LOOP1   LH    @RCNT,N                                                         
+         CH    @RCNT,@5                                                        
+         BC    2,@NEXT                                                         
          LH    @RSUM,S      Загрузка переменной в регистр                      
          AH    @RSUM,N      Формирование промежуточного значения               
          STH   @RSUM,S      Формирование значения арифм.выражения              
          LH    @RCNT,N                                                         
-         AH    @RCNT,@R1                                                       
+         AH    @RCNT,@1                                                        
          STH   @RCNT,N                                                         
-         BC    15,@L1                                                          
-@L11     LA    @RCNT,8                                                         
-         LA    @R3,10                                                          
+         BC    15,@LOOP1                                                       
+@NEXT    LH    @RCNT,@8                                                        
          STH   @RCNT,N                                                         
-@L2      CH    @RCNT,@R3                                                       
-         BC    2,@L22                                                          
+@LOOP2   LH    @RCNT,N                                                         
+         CH    @RCNT,@10                                                       
+         BC    2,@EXIT                                                         
          LH    @RSUM,S      Загрузка переменной в регистр                      
          AH    @RSUM,N      Формирование промежуточного значения               
          STH   @RSUM,S      Формирование значения арифм.выражения              
          LH    @RCNT,N                                                         
-         AH    @RCNT,@R1                                                       
+         AH    @RCNT,@1                                                        
          STH   @RCNT,N                                                         
-         BC    15,@L2                                                          
-@L22     BCR   15,14        Выход из программы                                 
-N        DC    H'0.'        Определение переменной                             
+         BC    15,@LOOP2                                                       
+@EXIT    BCR   15,@RVIX     Выход из программы                                 
+N        DS    H            Определение переменной                             
 S        DC    H'0.'        Определение переменной                             
-@RBASE   EQU   15                                                              
-@R1      EQU   1                                                               
-@RCNT    EQU   2                                                               
-@R3      EQU   3                                                               
-@RSUM    EQU   5                                                               
+@1       DC    H'1'         Константа 1                                        
+@5       DC    H'5'         Константа 5                                        
+@8       DC    H'8'         Константа 8                                        
+@10      DC    H'10'        Константа 10                                       
+@RSUM    EQU   2                                                               
+@RCNT    EQU   3                                                               
+@RBASE   EQU   5                                                               
+@RVIX    EQU   14                                                              
          END                Конец программы                                     

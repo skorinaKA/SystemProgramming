@@ -27,6 +27,9 @@
 
 int DLP_DETECTED = 0;
 int DLP_RUNNING = 0;
+void goBack(int steps);
+void goForward(int steps);
+void doLoopBody();
 
 /*
 ***** Б а з а  данных компилятора
@@ -1075,6 +1078,8 @@ int ODC1()
 	{
 		SYM[ISYM].TYPE = 'B';                        /* то устанавливаем тип   */
 		/* идентификатора = 'B' и */
+		if(!strcmp(FORMT[5], "INIT"))
+			SYM[ISYM].TYPE = 'I';
 		goto ODC11;                                   /* идем на продолжение об-*/
 		/* работки, а             */
 	}
@@ -1273,20 +1278,8 @@ int AVI2()
 	/*арифметического ПЛ1-опе-*/
 	/*ратора присваивания     */
 
-	int j;
-	for (j = 0; j < 20; j++)
-	{
-		if (!strcmp(DST[I2].DST1, "DLP") && DLP_DETECTED == 0)
-		{
-			DLP_DETECTED = 1;
-			DLP_RUNNING = 1;
-		}
-		I2++;
-	}
-	for (j = 0; j < 20; j++)
-	{
-		I2--;
-	}
+	goForward(8);
+	goBack(8);
 
 	if ((DLP_RUNNING == 1 && DLP_DETECTED == 1) || (DLP_RUNNING == 0 && DLP_DETECTED == 0))
 	{
@@ -1298,7 +1291,7 @@ int AVI2()
 				strlen(SYM[i].NAME) ==
 				strlen(FORMT[0]))
 				{
-					if (SYM[i].TYPE == 'B')              /* в случае типа=bin fixed*/
+					if (SYM[i].TYPE == 'B' || SYM[i].TYPE == 'I')              /* в случае типа=bin fixed*/
 					{
 
 					if (strcmp(SYM[i].RAZR, "15")    /* и разрядности <= 15    */
@@ -1345,7 +1338,7 @@ int AVI2()
 				strlen(FORMT[IFORMT - 1])
 				)
 			{
-				if (SYM[i].TYPE == 'B') /* если тип правого опе-  */
+				if (SYM[i].TYPE == 'B' || SYM[i].TYPE == 'I') /* если тип правого опе-  */
 				{                                      /* ранда bin fixed, то:   */
 					if (STROKA[DST[I2].DST4 -         /* если знак опер."+",то: */
 						strlen(FORMT[IFORMT - 1])] == '+')
@@ -1408,8 +1401,9 @@ int AVI2()
 		/*ния не определен в табл.*/
 		/* SYM, то завершить про- */
 		/* грамму по ошибке       */
-	}
   	}
+	}
+	return 0;
 }
 
 /*..........................................................................*/
@@ -1541,7 +1535,7 @@ int OEN2()
 	/*ного возврата управления*/
 	/* в вызывающую программу */
 
-	memcpy(ASS_CARD._BUFCARD.OPERAND, "15,14", 5);/* операнды команды и     */
+	memcpy(ASS_CARD._BUFCARD.OPERAND, "15,@RVIX", 8);/* операнды команды и     */
 
 	memcpy(ASS_CARD._BUFCARD.COMM,                /* поле построчного комен-*/
 		"Выход из программы", 18);/* тария                  */
@@ -1559,7 +1553,7 @@ int OEN2()
 		if (isalpha(SYM[i].NAME[0]))           /* содержит идентификатор,*/
 			/* т.е.начинается с буквы,*/
 		{                                            /* то:                    */
-			if (SYM[i].TYPE == 'B')                  /* если тип оператора bin */
+			if (SYM[i].TYPE == 'I')                  /* если тип оператора bin */
 				/* fixed, то:             */
 			{
 				strcpy(ASS_CARD._BUFCARD.METKA,         /* пишем идентификатор в  */
@@ -1594,6 +1588,34 @@ int OEN2()
 				ZKARD();                                 /* запомнить операцию     */
 				/*    Ассемблера          */
 			}
+		    else if (SYM[i].TYPE == 'B')                  /* если тип оператора bin */
+				/* fixed, то:             */
+			{
+				strcpy(ASS_CARD._BUFCARD.METKA,         /* пишем идентификатор в  */
+					SYM[i].NAME); /* поле метки псевдоопера-*/
+				/* ции DC                 */
+				ASS_CARD._BUFCARD.METKA[strlen
+				(ASS_CARD._BUFCARD.METKA)] = ' '; /* пишем разделитель полей*/
+
+				memcpy(ASS_CARD._BUFCARD.OPERAC,        /* пишем код псевдоопера- */
+					"DS", 2); /* ции DC                 */
+
+				if (strcmp(SYM[i].RAZR, "15") <= 0) /* формируем операнды псе-*/
+					/* вдооперации DC         */
+					strcpy(ASS_CARD._BUFCARD.OPERAND,      /* для случая полуслова   */
+						"H");
+				else                                      /* или                    */
+					strcpy(ASS_CARD._BUFCARD.OPERAND,      /* для случая слова       */					 "F\'");
+
+				ASS_CARD._BUFCARD.OPERAND[strlen        /* замыкающий апостроф    */
+				(ASS_CARD._BUFCARD.OPERAND)] = ' ';  /*          и             */
+
+				memcpy(ASS_CARD._BUFCARD.COMM,          /* поле построчного комен-*/
+					"Определение переменной", 22);  /* тария                  */
+
+				ZKARD();                                 /* запомнить операцию     */
+				/*    Ассемблера          */
+			}
 		}
 	}
 	/* далее идет блок декла- */
@@ -1603,36 +1625,54 @@ int OEN2()
 	/* рабочий регистры общего*/
 	/* назначения             */
 
-	memcpy(ASS_CARD._BUFCARD.METKA, "@RBASE", 6); /* формирование EQU-псев- */
-	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3);   /* дооперации определения */
-	memcpy(ASS_CARD._BUFCARD.OPERAND, "15", 2);  /* номера базового регист-*/
-	/* ра общего назначения   */
-	/*           и            */
-	ZKARD();                                       /* запоминание ее         */
+	memcpy(ASS_CARD._BUFCARD.METKA, "@1", 2);  
+	memcpy(ASS_CARD._BUFCARD.OPERAC, "DC", 2); 
+	memcpy(ASS_CARD._BUFCARD.OPERAND, "H\'1\'", 4);  
+	memcpy(ASS_CARD._BUFCARD.COMM, "Константа 1", 11);
+	ZKARD();                               
 
-	memcpy(ASS_CARD._BUFCARD.METKA, "@R1", 3);  
-	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3); 
-	memcpy(ASS_CARD._BUFCARD.OPERAND, "1", 1);  												
-												
-	ZKARD();
+	memcpy(ASS_CARD._BUFCARD.METKA, "@5", 2);  
+	memcpy(ASS_CARD._BUFCARD.OPERAC, "DC", 2); 
+	memcpy(ASS_CARD._BUFCARD.OPERAND, "H\'5\'", 4);  													
+	memcpy(ASS_CARD._BUFCARD.COMM, "Константа 5", 11);							
+	ZKARD(); 	
 
-	memcpy(ASS_CARD._BUFCARD.METKA, "@RCNT", 5);  
-	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3); 
-	memcpy(ASS_CARD._BUFCARD.OPERAND, "2", 1);  
-															
-	ZKARD();                                    
+	memcpy(ASS_CARD._BUFCARD.METKA, "@8", 2);  
+	memcpy(ASS_CARD._BUFCARD.OPERAC, "DC", 2); 
+	memcpy(ASS_CARD._BUFCARD.OPERAND, "H\'8\'", 4);  												
+	memcpy(ASS_CARD._BUFCARD.COMM, "Константа 8", 11);						
+	ZKARD(); 	
 
-	memcpy(ASS_CARD._BUFCARD.METKA, "@R3", 3);  
-	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3); 
-	memcpy(ASS_CARD._BUFCARD.OPERAND, "3", 1);  
-																				
+	memcpy(ASS_CARD._BUFCARD.METKA, "@10", 3);  
+	memcpy(ASS_CARD._BUFCARD.OPERAC, "DC", 2); 
+	memcpy(ASS_CARD._BUFCARD.OPERAND, "H\'10\'", 5);  											
+	memcpy(ASS_CARD._BUFCARD.COMM, "Константа 10", 12);																					
 	ZKARD(); 	
 
 	memcpy(ASS_CARD._BUFCARD.METKA, "@RSUM", 5);  /* формирование EQU-псев- */
 	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3);   /* дооперации определения */
-	memcpy(ASS_CARD._BUFCARD.OPERAND, "5", 1);   /* номера базового регист-*/
+	memcpy(ASS_CARD._BUFCARD.OPERAND, "2", 1);   /* номера базового регист-*/
 	/* ра общего назначения   */
 	/*            и           */
+	ZKARD();  	
+
+	memcpy(ASS_CARD._BUFCARD.METKA, "@RCNT", 5);  
+	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3); 
+	memcpy(ASS_CARD._BUFCARD.OPERAND, "3", 1);  
+															
+	ZKARD();     
+	
+	memcpy(ASS_CARD._BUFCARD.METKA, "@RBASE", 6); /* формирование EQU-псев- */
+	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3);   /* дооперации определения */
+	memcpy(ASS_CARD._BUFCARD.OPERAND, "5", 1);  /* номера базового регист-*/
+	/* ра общего назначения   */
+	/*           и            */
+	ZKARD();                                       /* запоминание ее         */
+
+	memcpy(ASS_CARD._BUFCARD.METKA, "@RVIX", 5);  
+	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3); 
+	memcpy(ASS_CARD._BUFCARD.OPERAND, "14", 2);  
+
 	ZKARD();                                       /* запоминание ее         */
 
 	memcpy(ASS_CARD._BUFCARD.OPERAC, "END", 3);  /* формирование кода ас-  */
@@ -1668,22 +1708,8 @@ int OPA2()
 	FORM();                                        /*форматируем ПЛ1-оператор*/
 	/*присваивания арифметич. */
 
-
-	int j;
-	for (j = 0; j < 20; j++)
-	{
-		if (!strcmp(DST[I2].DST1, "DLP") && DLP_DETECTED == 0)
-		{
-	//      printf("[OPA] DLP detected at future step : %d\n", I2);
-			DLP_DETECTED = 1;
-			DLP_RUNNING = 1;
-		}
-		I2++;
-	}
-	for (j = 0; j < 20; j++)
-	{
-		I2--;
-	}
+	goForward(8);
+	goBack(8);
 
 	if ((DLP_RUNNING == 1 && DLP_DETECTED == 1) || (DLP_RUNNING == 0 && DLP_DETECTED == 0))
 	{
@@ -1696,7 +1722,7 @@ int OPA2()
 			strlen(FORMT[0])
 			)
 		{
-			if (SYM[i].TYPE == 'B')              /* если этот идентификатор*/
+			if (SYM[i].TYPE == 'B' || SYM[i].TYPE == 'I')              /* если этот идентификатор*/
 			{                                      /* имеет тип bin fixed,то:*/
 
 				if (strcmp(SYM[i].RAZR, "15")    /* если bin fixed (15),то:*/
@@ -1732,7 +1758,8 @@ int OPA2()
 		}
 	}
 	return 4;                                       /* если идентификатор ра- */
-}
+	}
+	return 0;
 	/* нее не определен через */
 	/* ПЛ1-оператор DCL,то за-*/
 	/* вершение с диагностикой*/
@@ -1855,7 +1882,7 @@ int ZNK2()
 
 /*..........................................................................*/
 
-char LOOP_LABEL_BASE[3] = "@L\0";
+char LOOP_LABEL_BASE[6] = "@LOOP\0";
 int loopNumber = 1;
 
 void goBack(int steps)
@@ -1871,7 +1898,12 @@ void goForward(int steps)
 {
 	int i;
 	for (i = 0; i < steps; i++)
-	{
+	{		
+		if (!strcmp(DST[I2].DST1, "DLP") && DLP_DETECTED == 0)
+		{
+			DLP_DETECTED = 1;
+			// DLP_RUNNING = 1;
+		}
 		I2++;
 	}
 }
@@ -1903,10 +1935,12 @@ void doLoopBody()
 
 int DLP2()
 {
-  char LOOP_LABEL[6];
-  char LOOP_END_LABEL[6];
-  char LOOP_END_LABEL1[6];
-  char LOOP_END_LABEL2[6];
+  char LOOP_LABEL[9];
+  char LOOP_END_LABEL[9];
+  char LOOP_END_LABEL1[9];
+  char LOOP_END_LABEL2[9];
+  DLP_DETECTED = 0;
+  DLP_RUNNING = 1;
 
   int i;
   FORM();
@@ -1918,17 +1952,17 @@ int DLP2()
       if (SYM[i].TYPE == 'B')
       {
 
-        sprintf(LOOP_END_LABEL1, "%s%d%d", LOOP_LABEL_BASE, 1, 1);
-        sprintf(LOOP_END_LABEL2, "%s%d%d", LOOP_LABEL_BASE, 2, 2);
+        sprintf(LOOP_END_LABEL1, "%s", "@NEXT");
+        sprintf(LOOP_END_LABEL2, "%s", "@EXIT");
 
-        memcpy(ASS_CARD._BUFCARD.OPERAC, "LA", 2);
-        memcpy(ASS_CARD._BUFCARD.OPERAND, "@R1,1", 5);
-        ZKARD();
+        // memcpy(ASS_CARD._BUFCARD.OPERAC, "LA", 2);
+        // memcpy(ASS_CARD._BUFCARD.OPERAND, "@R1,1", 5);
+        // ZKARD();
         int j;
         for (j = 0; j < 2; j++)
         {
           sprintf(LOOP_LABEL, "%s%d", LOOP_LABEL_BASE, loopNumber);
-          sprintf(LOOP_END_LABEL, "%s%d%d", LOOP_LABEL_BASE, loopNumber, loopNumber);
+          sprintf(LOOP_END_LABEL, "%s", "@NEXT");
 
           printf("start loop with label: %s\n", LOOP_LABEL);
 
@@ -1936,16 +1970,11 @@ int DLP2()
 
           if (loopNumber == 2) {
             memcpy(ASS_CARD._BUFCARD.METKA, LOOP_END_LABEL1, strlen(LOOP_END_LABEL1));
+			sprintf(LOOP_END_LABEL, "%s", "@EXIT");
           }
-          memcpy(ASS_CARD._BUFCARD.OPERAC, "LA", 2);
-          strcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,");
+          memcpy(ASS_CARD._BUFCARD.OPERAC, "LH", 2);
+          strcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,@");
           strcat(ASS_CARD._BUFCARD.OPERAND, FORMT[j * 3 + 2]);
-          ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
-          ZKARD();
-
-          memcpy(ASS_CARD._BUFCARD.OPERAC, "LA", 2);
-          strcpy(ASS_CARD._BUFCARD.OPERAND, "@R3,");
-          strcat(ASS_CARD._BUFCARD.OPERAND, FORMT[j * 3 + 4]);
           ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
           ZKARD();
 
@@ -1956,8 +1985,16 @@ int DLP2()
           ZKARD();
 
           memcpy(ASS_CARD._BUFCARD.METKA, LOOP_LABEL, strlen(LOOP_LABEL));
+		  memcpy(ASS_CARD._BUFCARD.OPERAC, "LH", 2);
+          strcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,");
+          strcat(ASS_CARD._BUFCARD.OPERAND, FORMT[1]);
+          ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
+          ZKARD();
+
           memcpy(ASS_CARD._BUFCARD.OPERAC, "CH", 2);
-          memcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,@R3", 9);
+		  strcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,@");
+          strcat(ASS_CARD._BUFCARD.OPERAND, FORMT[j * 3 + 4]);
+		  ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
           ZKARD();
 
           memcpy(ASS_CARD._BUFCARD.OPERAC, "BC", 2);
@@ -1977,7 +2014,7 @@ int DLP2()
           ZKARD();
 
           memcpy(ASS_CARD._BUFCARD.OPERAC, "AH", 2);
-          memcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,@R1", 9);
+          memcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,@1", 8);
           ZKARD();
 
           memcpy(ASS_CARD._BUFCARD.OPERAC, "STH", 3);
