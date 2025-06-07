@@ -1,39 +1,39 @@
- EX21    START 0            Начало программы                                   
-         BALR  @RBASE,0     Загрузить регистр базы                             
-         USING *,@RBASE     Назначить регистр базой                            
-         LH    @RCNT,@1                                                        
+ EX21    START 0            Счетчик отн. адреса в нуль                         
+         BALR  @RBASE,0     Отн. адр. базы в @RBASE                            
+         USING *,@RBASE     Объявл. @RBASE регистром базы                      
+         LH    @RCNT,@1     Загружаем	начальное значение N1                    
          STH   @RCNT,N                                                         
 @LOOP1   LH    @RCNT,N                                                         
-         CH    @RCNT,@5                                                        
-         BC    2,@NEXT                                                         
+         CH    @RCNT,@5     Сравниваем N с 5                                   
+         BC    2,@NEXT      Если N > 5                                         
          LH    @RSUM,S      Загрузка переменной в регистр                      
          AH    @RSUM,N      Формирование промежуточного значения               
          STH   @RSUM,S      Формирование значения арифм.выражения              
          LH    @RCNT,N                                                         
          AH    @RCNT,@1                                                        
          STH   @RCNT,N                                                         
-         BC    15,@LOOP1                                                       
-@NEXT    LH    @RCNT,@8                                                        
+         BC    15,@LOOP1    Безусловный переход в начало цикла                 
+@NEXT    LH    @RCNT,@8     Загружаем	начальное значение N8                    
          STH   @RCNT,N                                                         
 @LOOP2   LH    @RCNT,N                                                         
-         CH    @RCNT,@10                                                       
-         BC    2,@EXIT                                                         
+         CH    @RCNT,@10    Сравниваем N с 10                                  
+         BC    2,@EXIT      Если N > 10                                        
          LH    @RSUM,S      Загрузка переменной в регистр                      
          AH    @RSUM,N      Формирование промежуточного значения               
          STH   @RSUM,S      Формирование значения арифм.выражения              
          LH    @RCNT,N                                                         
          AH    @RCNT,@1                                                        
          STH   @RCNT,N                                                         
-         BC    15,@LOOP2                                                       
+         BC    15,@LOOP2    Безусловный переход в начало цикла                 
 @EXIT    BCR   15,@RVIX     Выход из программы                                 
 N        DS    H            Определение переменной                             
-S        DC    H'0.'        Определение переменной                             
+S        DC    H'0'         Определение переменной                             
 @1       DC    H'1'         Константа 1                                        
 @5       DC    H'5'         Константа 5                                        
 @8       DC    H'8'         Константа 8                                        
 @10      DC    H'10'        Константа 10                                       
-@RSUM    EQU   2                                                               
-@RCNT    EQU   3                                                               
-@RBASE   EQU   5                                                               
-@RVIX    EQU   14                                                              
+@RSUM    EQU   2            Регистр для суммы (S)                              
+@RCNT    EQU   3            Регистр счетчик (N)                                
+@RBASE   EQU   5            Базовый регистр                                    
+@RVIX    EQU   14           Регистр возврата                                   
          END                Конец программы                                     

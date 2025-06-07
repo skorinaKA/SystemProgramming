@@ -1662,13 +1662,14 @@ int OEN2()
 	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3);   /* дооперации определения */
 	memcpy(ASS_CARD._BUFCARD.OPERAND, "2", 1);   /* номера базового регист-*/
 	/* ра общего назначения   */
-	/*            и           */
+	/*            и           */  											
+	memcpy(ASS_CARD._BUFCARD.COMM, "Регистр для суммы (S)", 21);		
 	ZKARD();  	
 
 	memcpy(ASS_CARD._BUFCARD.METKA, "@RCNT", 5);  
 	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3); 
 	memcpy(ASS_CARD._BUFCARD.OPERAND, "3", 1);  
-															
+	memcpy(ASS_CARD._BUFCARD.COMM, "Регистр счетчик (N)", 19);																	
 	ZKARD();     
 	
 	memcpy(ASS_CARD._BUFCARD.METKA, "@RBASE", 6); /* формирование EQU-псев- */
@@ -1676,12 +1677,13 @@ int OEN2()
 	memcpy(ASS_CARD._BUFCARD.OPERAND, "5", 1);  /* номера базового регист-*/
 	/* ра общего назначения   */
 	/*           и            */
+	memcpy(ASS_CARD._BUFCARD.COMM, "Базовый регистр", 15);		
 	ZKARD();                                       /* запоминание ее         */
 
 	memcpy(ASS_CARD._BUFCARD.METKA, "@RVIX", 5);  
 	memcpy(ASS_CARD._BUFCARD.OPERAC, "EQU", 3); 
 	memcpy(ASS_CARD._BUFCARD.OPERAND, "14", 2);  
-
+	memcpy(ASS_CARD._BUFCARD.COMM, "Регистр возврата", 16);		
 	ZKARD();                                       /* запоминание ее         */
 
 	memcpy(ASS_CARD._BUFCARD.OPERAC, "END", 3);  /* формирование кода ас-  */
@@ -1813,7 +1815,7 @@ int OPR2()
 	memcpy(ASS_CARD._BUFCARD.OPERAC, "START", 5);/* достраиваем код и опе- */
 	memcpy(ASS_CARD._BUFCARD.OPERAND, "0", 1);   /* ранды  в  START-псевдо-*/
 	memcpy(ASS_CARD._BUFCARD.COMM,                /* операции Ассемблера    */
-		"Начало программы", 16);
+		"Счетчик отн. адреса в нуль", 26);
 	ZKARD();                                       /* запоминаем карту Ассем-*/
 	/* блера                  */
 
@@ -1821,14 +1823,14 @@ int OPR2()
 	memcpy(ASS_CARD._BUFCARD.OPERAND,             /* Ассемблера             */
 		"@RBASE,0", 8);
 	memcpy(ASS_CARD._BUFCARD.COMM,
-		"Загрузить регистр базы", 22);
+		"Отн. адр. базы в @RBASE", 23);
 	ZKARD();                                       /* и запоминаем ее        */
 
 	memcpy(ASS_CARD._BUFCARD.OPERAC, "USING", 5);/* формируем USING-псевдо-*/
 	memcpy(ASS_CARD._BUFCARD.OPERAND,             /* операцию Ассемблера    */
 		"*,@RBASE", 8);
 	memcpy(ASS_CARD._BUFCARD.COMM,
-		"Назначить регистр базой", 23);
+		"Объявл. @RBASE регистром базы", 29);
 	ZKARD();                                       /* и запоминаем ее        */
 
 	return 0;                                       /* завершить подпрограмму */
@@ -1991,12 +1993,17 @@ int DLP2()
           strcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,@");
           strcat(ASS_CARD._BUFCARD.OPERAND, FORMT[j * 3 + 2]);
           ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
+		//   memcpy(ASS_CARD._BUFCARD.COMM, "Загружаем	начальное	значение	N=1", 32);
+          strcpy(ASS_CARD._BUFCARD.COMM, "Загружаем	начальное значение N");
+          strcat(ASS_CARD._BUFCARD.COMM, FORMT[j * 3 + 2]);
+          ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
           ZKARD();
 
           memcpy(ASS_CARD._BUFCARD.OPERAC, "STH", 3);
           strcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,");
           strcat(ASS_CARD._BUFCARD.OPERAND, FORMT[1]);
           ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
+		//   memcpy(ASS_CARD._BUFCARD.COMM, "N=1", 3);
           ZKARD();
 
           memcpy(ASS_CARD._BUFCARD.METKA, LOOP_LABEL, strlen(LOOP_LABEL));
@@ -2010,12 +2017,20 @@ int DLP2()
 		  strcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,@");
           strcat(ASS_CARD._BUFCARD.OPERAND, FORMT[j * 3 + 4]);
 		  ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
+		  strcpy(ASS_CARD._BUFCARD.COMM, "Сравниваем N с ");
+	  	  strcat(ASS_CARD._BUFCARD.COMM, FORMT[j * 3 + 4]);
+          ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
           ZKARD();
 
           memcpy(ASS_CARD._BUFCARD.OPERAC, "BC", 2);
           strcpy(ASS_CARD._BUFCARD.OPERAND, "2,");
           strcat(ASS_CARD._BUFCARD.OPERAND, LOOP_END_LABEL);
           ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
+		//   memcpy(ASS_CARD._BUFCARD.COMM, "Если N > 5, переходим к след. диапазону", 39);		  
+		  strcpy(ASS_CARD._BUFCARD.COMM, "Если N > ");
+	  	  strcat(ASS_CARD._BUFCARD.COMM, FORMT[j * 3 + 4]);
+          ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
+		//   strcat(ASS_CARD._BUFCARD.COMM, ", переходим к след. диапазону");
           ZKARD();
 
           doLoopBody();
@@ -2026,6 +2041,7 @@ int DLP2()
           strcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,");
           strcat(ASS_CARD._BUFCARD.OPERAND, FORMT[2]);
           ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
+		//   memcpy(ASS_CARD._BUFCARD.COMM, FORMT[2] + "+=" + "N", 6);
           ZKARD();
 
           memcpy(ASS_CARD._BUFCARD.OPERAC, "AH", 2);
@@ -2046,6 +2062,7 @@ int DLP2()
           strcpy(ASS_CARD._BUFCARD.OPERAND, "15,");
           strcat(ASS_CARD._BUFCARD.OPERAND, LOOP_LABEL);
           ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
+		  memcpy(ASS_CARD._BUFCARD.COMM, "Безусловный переход в начало цикла", 34);
           ZKARD();
 
           if (loopNumber == 2) {
