@@ -1920,7 +1920,12 @@ void goForward(int steps)
 {
 	int i;
 	for (i = 0; i < steps; i++)
-	{
+	{		
+		if (!strcmp(DST[I2].DST1, "DLP") && DLP_DETECTED == 0)
+		{
+			DLP_DETECTED = 1;
+			// DLP_RUNNING = 1;
+		}
 		I2++;
 	}
 }
@@ -1999,7 +2004,8 @@ int DLP2()
           ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
           ZKARD();
 
-          memcpy(ASS_CARD._BUFCARD.OPERAC, "STH", 3);
+          memcpy(ASS_CARD._BUFCARD.METKA, LOOP_LABEL, strlen(LOOP_LABEL));
+		  memcpy(ASS_CARD._BUFCARD.OPERAC, "LH", 2);
           strcpy(ASS_CARD._BUFCARD.OPERAND, "@RCNT,");
           strcat(ASS_CARD._BUFCARD.OPERAND, FORMT[1]);
           ASS_CARD._BUFCARD.OPERAND[strlen(ASS_CARD._BUFCARD.OPERAND)] = ' ';
