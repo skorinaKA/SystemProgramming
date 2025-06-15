@@ -939,8 +939,8 @@ void ZKARD()                                     /* записи очередной сгене-*/
 						 /* ASSTXT                 */
 	char i;
 
-	for (i = 0; i < 50; i++)
-		ASSTXT[i][79] = '\n';
+	// for (i = 0; i < 50; i++)
+	// 	ASSTXT[i][79] = '\n';
 
 	memcpy(ASSTXT[IASSTXT++],
 		ASS_CARD.BUFCARD, 80);

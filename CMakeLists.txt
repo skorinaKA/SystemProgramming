@@ -24,6 +24,11 @@ set_target_properties(kompassr PROPERTIES
 	VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 	VS_DEBUGGER_COMMAND_ARGUMENTS "examppl.ass")
 
+add_executable (absloadm "absloadm.c")
+set_target_properties(absloadm PROPERTIES
+	VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+	VS_DEBUGGER_COMMAND_ARGUMENTS "spis.mod")
+
 if(NOT CMAKE_C_COMPILER)
     message(FATAL_ERROR "CMAKE_C_COMPILER is not set.")
 endif()

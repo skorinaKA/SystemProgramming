@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/kompassr.exe",
-            "args": ["examppl.ass"],
+            "args": ["__examppl.ass"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
