@@ -10,7 +10,7 @@
 #define  NSPIS  5                                 /*разм.списка загр.прогр. */
 #define  NOBJ   50                                /*разм.масс.об'ектных карт*/
 #define  DOBLZ  1024                              /*длина области загрузки  */
-#define  NOP 6                                    /*кол-во обрабатываемых   */
+#define  NOP 11                                   /*кол-во обрабатываемых   */
 						  /* команд                 */
 
 
@@ -75,7 +75,7 @@ int R1,                                           /*номер 1-го регистра-опе-*/
 unsigned long I,                                  /*счетчик адр.тек.ком-ды  */
 	      BAS_ADDR,                           /*адрес начала обл.загруз.*/
 	      I1,ADDR,ARG,VS;                     /*вспомогательные перем.  */
-unsigned long VR[16],                             /*массив,содерж.знач.рег. */
+unsigned long VR[17],                             /*массив,содерж.знач.рег. */
 	      LIGHTPTR;                           /*адрес начала обл.отсвет.*/
 
 
@@ -121,12 +121,17 @@ int BAS_IND;                                      /*индекс масс.обл.загр.,  */
    int (*BXPROG)()        ;                       /*указатель на подпр.обраб*/
   } T_MOP [NOP]  =                                /*об'явление табл.маш.опер*/
     {
-{{'B' , 'A' , 'L' , 'R' , ' '} , '\x05', 2 , FRR},/*инициализация           */
-{{'B' , 'C' , 'R' , ' ' , ' '} , '\x07', 2 , FRR}, /*строк                   */
-{{'S' , 'T' , ' ' , ' ' , ' '} , '\x50', 4 , FRX}, /*таблицы                 */
-{{'L' , ' ' , ' ' , ' ' , ' '} , '\x58', 4 , FRX}, /*машинных                */
-{{'A' , ' ' , ' ' , ' ' , ' '} , '\x5A', 4 , FRX}, /*операций                */
-{{'S' , ' ' , ' ' , ' ' , ' '} , '\x5B', 4 , FRX}, /*                        */
+{{'B', 'A', 'L', 'R', ' '}, '\x05', 2, FRR},/*инициализация           */
+{{'B', 'C', 'R', ' ', ' '}, '\x07', 2, FRR}, /*строк                   */
+{{'S', 'T', ' ', ' ', ' '}, '\x50', 4, FRX}, /*таблицы                 */
+{{'L', ' ', ' ', ' ', ' '}, '\x58', 4, FRX}, /*машинных                */
+{{'A', ' ', ' ', ' ', ' '}, '\x5A', 4, FRX}, /*операций                */
+{{'S', ' ', ' ', ' ', ' '}, '\x5B', 4, FRX}, /*                        */
+        {{'S', 'T', 'H', ' ', ' '}, '\x40', 4, FRX},
+        {{'L', 'H', ' ', ' ', ' '}, '\x48', 4, FRX},
+        {{'C', 'H', ' ', ' ', ' '}, '\x49', 4, FRX},
+        {{'A', 'H', ' ', ' ', ' '}, '\x4A', 4, FRX},
+        {{'B', 'C', ' ', ' ', ' '}, '\x47', 4, FRX}                                            
     };
 //..........................................................................
 //п р о г р а м м а реализации семантики команды BALR
@@ -246,6 +251,107 @@ int P_S()                                         /* п р о г р а м м а      */
   return 0;                                       /*успешное заверш.прогр.  */
  }
 
+int P_STH()
+{
+  printf ( "%s\n", "P_STH" );
+  int sm,i; 
+  char bytes[2];
+
+  ADDR = VR[B] + VR[X] + D;
+
+  sm = (int) (ADDR -I);
+
+  bytes[0] = ((VR[R1] % 0x10000L) - ((VR[R1]%0x10000L)%0x100))/0x100;
+  bytes[1] = (VR[R1] % 0x10000L) % 0x100;
+
+  for (i=0; i<2; i++) 
+    OBLZ[BAS_IND + CUR_IND + sm + i] = bytes[i];
+
+  return 0;
+}
+
+int P_LH()
+{
+  printf ( "%s\n", "P_LH" );
+  int sm;
+
+  ADDR = VR[B] + VR[X] + D;
+  sm = (int) (ADDR - I);
+
+  VR[R1] = OBLZ[BAS_IND + CUR_IND + sm] * 0x100 + OBLZ[BAS_IND + CUR_IND + sm + 1];
+
+  return 0;
+}
+
+int P_CH()
+{
+  printf ( "%s\n", "P_CH" );
+  int offset;
+  unsigned int cmpv;
+
+  ADDR = VR[B] + VR[X] + D;
+  offset = (int) (ADDR - I);
+
+  cmpv = OBLZ[BAS_IND + CUR_IND + offset] * 0x100 + OBLZ[BAS_IND + CUR_IND + offset + 1];
+
+  if (VR[R1] == cmpv)
+    VR[16] = 0;
+  else if (VR[R1] < cmpv)
+    VR[16] = 1;
+  else
+    VR[16] = 2;
+
+  return 0;
+}
+
+int P_AH()
+{
+  printf ( "%s\n", "P_AH" );
+
+  int offset;
+  unsigned int c;
+
+  ADDR = VR[B] + VR[X] + D;
+  offset = (int) (ADDR - I);
+
+  ARG = OBLZ[BAS_IND + CUR_IND + offset] * 0x100 + OBLZ[BAS_IND + CUR_IND + offset + 1];
+
+  VR[R1] = VR[R1] + ARG;
+
+  return 0;
+}
+
+int P_BC()
+{
+  int temp;
+
+  ADDR = VR[B] + VR[X] + D;
+  temp = (int)(ADDR - I);
+  
+  if(R1 == 15) 
+  {
+    I = BAS_ADDR + CUR_IND + temp;
+    CUR_IND = CUR_IND + temp;
+  }
+  else if(R1 == 2)
+  {
+    if(VR[16]==2)
+    {
+      I = BAS_ADDR + CUR_IND + temp;
+      CUR_IND = CUR_IND + temp;
+    }
+  }
+  else if(R1 == 11)
+  {
+    if((VR[16] == 2) || (VR[16] == 0))
+    {
+      I = BAS_ADDR + CUR_IND + temp;
+      CUR_IND = CUR_IND + temp;
+    }
+  }
+
+  return 0;
+}
 
 //..........................................................................
 int FRR(void)
@@ -306,8 +412,8 @@ int FRX(void)
       
       ADDR = VR[B] + VR[X] + D;
       wprintw(wgreen,"        %.06lX       \n", ADDR);
-      if (ADDR % 4 != 0)
-        return (7);
+      // if (ADDR % 4 != 0)
+      //   return (7);
       break;
     }
   }
@@ -545,6 +651,17 @@ SKIP:
     case '\x5A' : P_A();
 		   break;
     case '\x5B' : P_S();
+       break;
+    case '\x40' : P_STH();
+      break;
+    case '\x48' : P_LH();
+      break;
+    case '\x49' : P_CH();
+      break;
+    case '\x4A' : P_AH();
+      break;
+    case '\x47' : P_BC();
+      break;
    }
    
    goto BEGIN;	
