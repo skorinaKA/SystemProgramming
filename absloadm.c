@@ -372,7 +372,7 @@ int FRR(void)
       wprintw(wgreen, "%1d, ", j);
       j = INST[1] % 0x10;
       R2 = j;
-      wprintw(wgreen, "%1d\n", j);
+      wprintw(wgreen, "%-12d\n", j);
       break;
     }
   }
@@ -496,7 +496,7 @@ int sys(void)
   wbkgd(wred, COLOR_PAIR(COLOR_RED));
   
 //поле регистров
-  wblue = newwin(16, 12, 0, 68);
+  wblue = newwin(17, 12, 0, 68);
   wbkgd(wblue, COLOR_PAIR(COLOR_BLUE));
   
 //текст  
@@ -573,7 +573,10 @@ l0:
       waddstr(wblue, "R");
     wprintw(wblue, "%d:", i);
     wprintw(wblue, "%.08lX", VR[i]);
-  }      
+  }
+  waddstr(wblue, " CC:");
+  wprintw(wblue, "%d", VR[16]);
+
   wrefresh(wblue);			//вывод на экран		  
   wclear(wblue);			//очистка окна регистров
   wind();   
